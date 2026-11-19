@@ -1,8 +1,5 @@
 # Bookstore API — автентифікація і захист
 
-> Цей файл — **шаблон вашого звіту**. Заповніть розділи нижче і закомітьте разом із кодом.
-> Умова завдання — у Moodle.
-
 ## Варіант
 
 - Номер варіанта: 6
@@ -10,7 +7,7 @@
 - Право: P3
 - Throttle: 6 запитів/год для аноніма · 120 запитів/добу для користувача
 - Інтеграція: I1
-- Відеозахист (до 3 хв): <посилання>
+- Відеозахист :закреслено завдання
 
 ## Запуск
 
@@ -97,13 +94,14 @@ HTTP/1.1 429 Too Many Requests
 
 Щонайменше дві помилки, на які ви справді натрапили.
 
-| Що побачили (текст помилки або код) | Причина | Що змінили |
-|1.помилка-404 Not Found на /api/v1/auth/jwt/create/; у списку URL були auth/login/, auth/refresh/, auth/logout/
-приичина-Адреси в core/urls.py не збігались із вимогою завдання
-що змінили-змінила адреси на auth/jwt/create/, auth/jwt/refresh/, auth/jwt/logout/
-2.помилка-403 замість 401 на /auth/jwt/logout/
-причина-У в'юхи authentication_classes = []: DRF не має заголовка WWW-Authenticate і замінює 401 на 403
-що змінили-Поставила authentication_classes = [JWTAuthentication] (і кидаю AuthenticationFailed)
+## Журнал помилок
+
+| Що побачили | Причина | Що змінили |
+|---|---|---|
+| 404 Not Found на `/api/v1/auth/jwt/create/`; у списку URL були `auth/login/`, `auth/refresh/`, `auth/logout/` | Адреси в `core/urls.py` не збігались із вимогою завдання | Змінила адреси на `auth/jwt/create/`, `auth/jwt/refresh/`, `auth/jwt/logout/` |
+| 403 замість 401 на `/auth/jwt/logout/` | У в'юхи `authentication_classes = []`: DRF не має заголовка `WWW-Authenticate` і замінює 401 на 403 | Поставила `authentication_classes = [JWTAuthentication]` |
+| `ImportError: cannot import name 'JWTLogoutView'` | Файл `auth_views.py` був порожній | Вставила код класу і зберегла файл |
+| `That port is already in use`, самі `429` | Старий `runserver` працював і тримав лічильник | `pkill -f "manage.py runserver"` і запуск заново |
 
 ## Дослідницькі питання
 
@@ -112,6 +110,8 @@ Claims. Я розкодувала access і refresh на jwt.io. В обох є 
 ROTATE і BLACKLIST. Коли я оновлюю токен через /refresh/, сервер дає новий access і новий refresh. А старий refresh одразу йде в чорний список, і ним уже не можна користуватись ще раз. Для цього треба було додати token_blacklist в INSTALLED_APPS і зробити migrate.
 Старий access після logout. [ЗАПОВНИТИ: який код вийшов у вас.] Logout вбиває тільки refresh. Access просто перевіряється за підписом і за часом, у чорний список сервер не дивиться. Тому він працює, поки не мине його час. Через це час життя access роблять маленьким, у мене 15 хвилин.
 Порядок у APIView.initial(). Спершу йде перевірка автентифікації, потім прав, потім лімітів. Якщо анонім отримав 401 на правах, до лімітів запит не доходить, тому ліміт не витрачається. У мене це видно: до 429 було 5 запитів до /authors/ і 1 вхід, разом 6, а запит POST /books/ без токена з відповіддю 401 не порахувався.
+Джерело: https://django-rest-framework-simplejwt.readthedocs.io/ (питання 1 і 2)
+Джерело: https://www.django-rest-framework.org/api-guide/throttling/ та метод APIView.initial() у rest_framework/views.py
 
 ## Якщо користувались ШІ
 
