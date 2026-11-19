@@ -20,6 +20,7 @@ class BookViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["title", "author__name"]
     ordering_fields = ["price", "title"]
+    queryset = Book.objects.select_related("author", "owner")
 
     def perform_create(self, serializer):
         owner = self.request.user if self.request.user.is_authenticated else None
